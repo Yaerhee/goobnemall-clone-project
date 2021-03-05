@@ -22,5 +22,6 @@
   
 <b>Comments:</b>  
 *  /src/com/goobne 에는 dao, dto, GoobneServlet 파일이 담겨 있습니다.  
-*  /goobne 에는 홈페이지를 구성하는 jsp 파일 및 css, js, 이미지 등의 데이터 파일이 담겨 있습니다.
+*  /goobne 에는 홈페이지를 구성하는 jsp 파일 및 css, js, 이미지 등의 데이터 파일이 담겨 있습니다.  
+*  chicken table and data (Ver.7).txt 파일은 테이블을 구성하는 기본 데이터가 담겨있는 쿼리 및 데이터 생성 쿼리로 구성되어 있습니다.
 
