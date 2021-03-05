@@ -1,0 +1,1041 @@
+﻿CREATE USER CHICKEN IDENTIFIED BY 123 DEFAULT TABLESPACE USERS;
+GRANT CONNECT, RESOURCE, DBA TO CHICKEN;
+
+DROP TABLE review PURGE;
+DROP TABLE orderInfo PURGE;
+DROP TABLE qna PURGE;
+DROP TABLE userInfo PURGE;
+DROP TABLE product PURGE;
+DROP TABLE cart PURGE;
+
+create table userInfo
+(id VARCHAR2(10) CONSTRAINT USERINFO_ID_PK PRIMARY KEY,
+pwd VARCHAR2(10) CONSTRAINT USERINFO_PWD_NN NOT NULL,
+name VARCHAR2(10) CONSTRAINT USERINFO_NAME_NN NOT NULL,
+email VARCHAR2(30) CONSTRAINT USERINFO_EMAIL_NN NOT NULL,
+gender VARCHAR2(5) CONSTRAINT USERINFO_GENDER_CK CHECK(GENDER IN ('M','W','m','w','남자','여자','남','여') AND GENDER IS NOT NULL),
+tel VARCHAR2(15) CONSTRAINT USERINFO_TEL_NN NOT NULL,
+birth VARCHAR2(12) CONSTRAINT USERINFO_BIRTH_NN NOT NULL,
+addr VARCHAR2(100) CONSTRAINT USERINFO_ADDR_NN NOT NULL,
+created DATE CONSTRAINT USERINFO_CREATED_NN NOT NULL);
+
+create table cart(
+num number CONSTRAINT CART_NUM_NN NOT NULL,
+id VARCHAR2(20) CONSTRAINT CART_ID_FK REFERENCES userInfo(id),
+productName VARCHAR2(100) CONSTRAINT CART_PRODUCTNAME_NN NOT NULL,
+qty NUMBER CONSTRAINT CART_QTY_NN NOT NULL,
+price NUMBER CONSTRAINT CART_PRICE_NN NOT NULL,
+pic1 VARCHAR2(100)CONSTRAINT CART_PIC1_NN NOT NULL);
+
+create table product
+(productNum VARCHAR2(5) CONSTRAINT PRODUCT_PRODUCTNUM_PK PRIMARY KEY,
+category1 VARCHAR2(50) CONSTRAINT PRODUCT_CATEGORY1_NN NOT NULL,
+category2 VARCHAR2(50) CONSTRAINT PRODUCT_CATEGORY2_NN NOT NULL,
+category3 VARCHAR2(50) CONSTRAINT PRODUCT_CATEGORY3_NN NOT NULL,
+productName VARCHAR2(100) CONSTRAINT PRODUCT_PRODUCTNAME_NN NOT NULL,
+price NUMBER CONSTRAINT PRODUCT_PRICE_NN NOT NULL,
+amount NUMBER CONSTRAINT PRODUCT_AMOUNT_NN NOT NULL,
+qty NUMBER CONSTRAINT PRODUCT_QTY_NN NOT NULL,
+pic1 VARCHAR2(200),
+pic2 VARCHAR2(200),
+pic3 VARCHAR2(200),
+pic4 VARCHAR2(200),
+CONSTRAINT PRODUCT_PRODUCTNAME_UK UNIQUE(productName));
+
+create table orderInfo
+(orderNum NUMBER CONSTRAINT ORDERINFO_ORDERNUM_PK PRIMARY KEY,
+id VARCHAR2(10) CONSTRAINT ORDERINFO_ID_FK REFERENCES userInfo(id),
+productNum VARCHAR2(5) CONSTRAINT ORDERINFO_PRODUCTNUM_FK REFERENCES product(productNum),
+qty NUMBER CONSTRAINT ORDERINFO_QTY_NN NOT NULL,
+buyerName VARCHAR2(10) CONSTRAINT ORDERINFO_BUYERNAME_NN NOT NULL,
+buyerTel VARCHAR2(15) CONSTRAINT ORDERINFO_BUYERTEL_NN NOT NULL,
+buyerEmail VARCHAR2(30) CONSTRAINT ORDERINFO_BUYEREMAIL_NN NOT NULL,
+getterName VARCHAR2(10) CONSTRAINT ORDERINFO_GETTERNAME_NN NOT NULL,
+getterTel1 VARCHAR2(15) CONSTRAINT ORDERINFO_GETTERTEL_NN NOT NULL,
+getterTel2 VARCHAR2(15),
+getterZip VARCHAR2(10) CONSTRAINT ORDERINFO_GETTERZIP_NN NOT NULL,
+getterAddr VARCHAR2(100) CONSTRAINT ORDERINFO_GETTERADDR_NN NOT NULL,
+getterMsg VARCHAR2(1000),
+payWay VARCHAR(20) CONSTRAINT ORDERINFO_PAYWAY_NN NOT NULL,
+payerName VARCHAR(10) CONSTRAINT ORDERINFO_PAYERNAME_NN NOT NULL,
+bankName VARCHAR(100) CONSTRAINT ORDERINFO_BANKNAME_NN NOT NULL,
+totalCost NUMBER CONSTRAINT ORDERINFO_TOTALCOST_NN NOT NULL,
+orderDate DATE CONSTRAINT ORDERINFO_ORDERDATE_NN NOT NULL,
+orderState VARCHAR2(10) CONSTRAINT ORDERINFO_ORDERSTATE_CK CHECK (orderState IN ('배송전','배송중','배송완료') AND orderState IS NOT NULL));
+
+create table review(
+reviewNum NUMBER CONSTRAINT REVIEW_REVIEWNUM_PK PRIMARY KEY,
+id VARCHAR2(10) CONSTRAINT REVIEW_ID_FK REFERENCES userInfo(id),
+orderNum NUMBER CONSTRAINT REVIEW_ORDERNUM_FK REFERENCES orderInfo(orderNum),
+productName VARCHAR2(50) CONSTRAINT REVIEW_PRODUCTNAME_NN REFERENCES product(productName),
+score NUMBER CONSTRAINT REVIEW_SCORE_CC CHECK (score BETWEEN 1 AND 5 AND score IS NOT NULL),
+subject VARCHAR2(50) CONSTRAINTS REVIEW_SUBJECT_NN NOT NULL,
+content VARCHAR2(1000) CONSTRAINTS REVIEW_CONTENT_NN NOT NULL,
+created DATE CONSTRAINT REVIEW_CREATED_NOT NOT NULL);
+
+create table qna(
+qnaNum NUMBER CONSTRAINT QNA_QNANUM_PK PRIMARY KEY,
+id VARCHAR2(50) CONSTRAINT QNA_ID_NN NOT NULL,
+subject VARCHAR2(100) CONSTRAINTS QNA_SUBJECT_NN NOT NULL,
+content VARCHAR2(1000) CONSTRAINTS QNA_CONTENT_NN NOT NULL,
+created DATE CONSTRAINT QNA_CREATED_NOT NOT NULL);
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A01','닭가슴살','소스가 맛있는 닭가슴살','화이트머쉬룸',
+'굽네 소스가 맛있는 닭가슴살 슬라이스-화이트머쉬룸 1팩',
+2700,100,120,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/30baac9a403142dabc1fb0870f385ff2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/2b054dc9184c4faca2977858cb4c2d82.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/c242a8acb8df4537afdc95668dd0e1e7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/ad90777cf4354f109ee88c8862d2f94e.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A02','닭가슴살','소스가 맛있는 닭가슴살','화이트머쉬룸',
+'[특가]소스가 맛있는 닭가슴살-화이트머쉬룸 3팩',
+6600,100,120,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/30baac9a403142dabc1fb0870f385ff2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/2b054dc9184c4faca2977858cb4c2d82.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/c242a8acb8df4537afdc95668dd0e1e7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/ad90777cf4354f109ee88c8862d2f94e.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A03','닭가슴살','소스가 맛있는 닭가슴살','화이트머쉬룸',
+'[특가]소스가 맛있는 닭가슴살-화이트머쉬룸 5팩',
+10850,100,120,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/30baac9a403142dabc1fb0870f385ff2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/2b054dc9184c4faca2977858cb4c2d82.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/c242a8acb8df4537afdc95668dd0e1e7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/ad90777cf4354f109ee88c8862d2f94e.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A04','닭가슴살','소스가 맛있는 닭가슴살','화이트머쉬룸',
+'[특가]소스가 맛있는 닭가슴살-화이트머쉬룸 10팩',
+21500,100,120,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/30baac9a403142dabc1fb0870f385ff2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/2b054dc9184c4faca2977858cb4c2d82.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/c242a8acb8df4537afdc95668dd0e1e7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/ad90777cf4354f109ee88c8862d2f94e.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A05','닭가슴살','소스가 맛있는 닭가슴살','레드크림커리',
+'굽네 소스가 맛있는 닭가슴살 슬라이스-레드크림커리 1팩',
+2700,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/e1ce4c30e4594f36a1663f2aa02b737e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/6ca21829bde541d88c672b1a31c4c9b4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/732dee8956104a4982eb50b19cafc9f8.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/de2ad01c062e48c6bc1e257909f03cd5.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A06','닭가슴살','소스가 맛있는 닭가슴살','레드크림커리',
+'[특가]소스가 맛있는 닭가슴살-레드크림커리 3팩',
+6600,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/e1ce4c30e4594f36a1663f2aa02b737e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/6ca21829bde541d88c672b1a31c4c9b4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/732dee8956104a4982eb50b19cafc9f8.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/de2ad01c062e48c6bc1e257909f03cd5.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A07','닭가슴살','소스가 맛있는 닭가슴살','레드크림커리',
+'[특가]소스가 맛있는 닭가슴살-레드크림커리 5팩',
+10850,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/e1ce4c30e4594f36a1663f2aa02b737e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/6ca21829bde541d88c672b1a31c4c9b4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/732dee8956104a4982eb50b19cafc9f8.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/de2ad01c062e48c6bc1e257909f03cd5.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A08','닭가슴살','소스가 맛있는 닭가슴살','레드크림커리',
+'[특가]소스가 맛있는 닭가슴살-레드크림커리 10팩',
+21500,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/e1ce4c30e4594f36a1663f2aa02b737e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/6ca21829bde541d88c672b1a31c4c9b4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/732dee8956104a4982eb50b19cafc9f8.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/de2ad01c062e48c6bc1e257909f03cd5.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A09','닭가슴살','소스가 맛있는 닭가슴살','스파이시커리',
+'굽네 소스가 맛있는 닭가슴살 슬라이스-스파이시커리 1팩',
+2700,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/4f17114c53fd4b989f2555b5ba8188f4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/202e99f79ee14b9aab637a74b5381788.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/8e363a56b7db4a81b66bcdf184d90753.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/f053e2c2d37547c99727060b5493e2bd.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A10','닭가슴살','소스가 맛있는 닭가슴살','스파이시커리',
+'[특가]소스가 맛있는 닭가슴살-스파이시커리 3팩',
+6600,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/4f17114c53fd4b989f2555b5ba8188f4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/202e99f79ee14b9aab637a74b5381788.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/8e363a56b7db4a81b66bcdf184d90753.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/f053e2c2d37547c99727060b5493e2bd.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A11','닭가슴살','소스가 맛있는 닭가슴살','스파이시커리',
+'[특가]소스가 맛있는 닭가슴살-스파이시커리 5팩',
+10850,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/4f17114c53fd4b989f2555b5ba8188f4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/202e99f79ee14b9aab637a74b5381788.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/8e363a56b7db4a81b66bcdf184d90753.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/f053e2c2d37547c99727060b5493e2bd.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A12','닭가슴살','소스가 맛있는 닭가슴살','스파이시커리',
+'[특가]소스가 맛있는 닭가슴살-스파이시커리 10팩',
+21500,100,120,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/4f17114c53fd4b989f2555b5ba8188f4.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/202e99f79ee14b9aab637a74b5381788.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/8e363a56b7db4a81b66bcdf184d90753.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/01/f053e2c2d37547c99727060b5493e2bd.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A13','닭가슴살','훈제 슬라이스','오리지널',
+'[무료배송특가]훈제 슬라이스-오리지널 20팩',
+30600,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/08/02/1f72a59579b54871be9819f589edd224.jpg',
+null,
+null,
+null);
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A14','닭가슴살','훈제 슬라이스','오리지널',
+'[무료배송특가]훈제 슬라이스-오리지널 30팩',
+45300,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/08/02/1f72a59579b54871be9819f589edd224.jpg',
+null,
+null,
+null);
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A15','닭가슴살','훈제 슬라이스','오리지널',
+'훈제 슬라이스-오리지널 1팩',
+2000,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/6047f11efd104683a502638c79fc89ee.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/3032a848b3e349f5b46f4d6a001eee8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/f16c4de81c6d42c195b369dcfae1ecc2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/6b6a009d20354787b161fa65fbf71507.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A16','닭가슴살','훈제 슬라이스','오리지널',
+'[특가] 훈제 슬라이스-오리지널 5팩',
+7950,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/6047f11efd104683a502638c79fc89ee.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/3032a848b3e349f5b46f4d6a001eee8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/f16c4de81c6d42c195b369dcfae1ecc2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/6b6a009d20354787b161fa65fbf71507.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A17','닭가슴살','훈제 슬라이스','오리지널',
+'[특가] 훈제 슬라이스-오리지널 10팩',
+15700,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/6047f11efd104683a502638c79fc89ee.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/3032a848b3e349f5b46f4d6a001eee8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/f16c4de81c6d42c195b369dcfae1ecc2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/6b6a009d20354787b161fa65fbf71507.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A18','닭가슴살','훈제 슬라이스','오리지널',
+'[특가] 훈제 슬라이스-오리지널 15팩',
+23250,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/6047f11efd104683a502638c79fc89ee.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/3032a848b3e349f5b46f4d6a001eee8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/f16c4de81c6d42c195b369dcfae1ecc2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/6b6a009d20354787b161fa65fbf71507.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A19','닭가슴살','훈제 슬라이스','스파이시',
+'[무료배송특가]훈제 슬라이스-스파이시 20팩',
+30600,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/08/02/b4bec75b2a564e9da9b3ff0ed29cffc7.jpg',
+null,
+null,
+null);
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A20','닭가슴살','훈제 슬라이스','스파이시',
+'[무료배송특가]훈제 슬라이스-스파이시 30팩',
+45300,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/08/02/b4bec75b2a564e9da9b3ff0ed29cffc7.jpg',
+null,
+null,
+null);
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A21','닭가슴살','훈제 슬라이스','스파이시',
+'훈제 슬라이스-스파이시 1팩',
+2000,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/68171e50e8f84b1d81220ce864390644.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/e5864acefa034faa80d6e0c2921702b1.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ed95aae313f24793b4660bc432a7c95d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/222c4bc63f634d24a860ddbb71f48b9a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A22','닭가슴살','훈제 슬라이스','스파이시',
+'[특가] 훈제 슬라이스-스파이시 5팩',
+7950,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/68171e50e8f84b1d81220ce864390644.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/e5864acefa034faa80d6e0c2921702b1.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ed95aae313f24793b4660bc432a7c95d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/222c4bc63f634d24a860ddbb71f48b9a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A23','닭가슴살','훈제 슬라이스','스파이시',
+'[특가] 훈제 슬라이스-스파이시 10팩',
+15700,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/68171e50e8f84b1d81220ce864390644.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/e5864acefa034faa80d6e0c2921702b1.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ed95aae313f24793b4660bc432a7c95d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/222c4bc63f634d24a860ddbb71f48b9a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A24','닭가슴살','훈제 슬라이스','스파이시',
+'[특가] 훈제 슬라이스-스파이시 15팩',
+23250,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/68171e50e8f84b1d81220ce864390644.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/e5864acefa034faa80d6e0c2921702b1.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ed95aae313f24793b4660bc432a7c95d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/222c4bc63f634d24a860ddbb71f48b9a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A25','닭가슴살','수비드','갈릭허브',
+'수비드-갈릭허브 1팩',
+2250,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/77a3eb174405406cbd126a0d1c603c8c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/85f60f82308a49d49d56db05c327111e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/2d64fbc67cad47229d55b47337d07d46.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ad44ea4a21654176bb59b182e45b5b43.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A26','닭가슴살','수비드','갈릭허브',
+'[특가]수비드-갈릭허브 6팩',
+10080,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/77a3eb174405406cbd126a0d1c603c8c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/85f60f82308a49d49d56db05c327111e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/2d64fbc67cad47229d55b47337d07d46.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ad44ea4a21654176bb59b182e45b5b43.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A27','닭가슴살','수비드','갈릭허브',
+'[특가]수비드-갈릭허브 10팩',
+16600,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/77a3eb174405406cbd126a0d1c603c8c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/85f60f82308a49d49d56db05c327111e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/2d64fbc67cad47229d55b47337d07d46.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ad44ea4a21654176bb59b182e45b5b43.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A28','닭가슴살','수비드','갈릭허브',
+'[특가]수비드-갈릭허브 15팩',
+24600,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/77a3eb174405406cbd126a0d1c603c8c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/85f60f82308a49d49d56db05c327111e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/2d64fbc67cad47229d55b47337d07d46.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ad44ea4a21654176bb59b182e45b5b43.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A29','닭가슴살','수비드','갈릭허브',
+'[특가]수비드-갈릭허브 20팩',
+32400,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/77a3eb174405406cbd126a0d1c603c8c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/03/05/85f60f82308a49d49d56db05c327111e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/2d64fbc67cad47229d55b47337d07d46.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ad44ea4a21654176bb59b182e45b5b43.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A30','닭가슴살','수비드','블랙올리브',
+'수비드-블랙올리브 1팩',
+2250,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/163bfefb63d240059524fe05887544ce.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/6ff5935cb1f34d3fa633c62faf41024c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/43877f295ca042afb1d252c20f850766.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/32c5bea143544cb1a57633f23a1b47d0.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A31','닭가슴살','수비드','블랙올리브',
+'[특가]수비드-블랙올리브 6팩',
+10080,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/163bfefb63d240059524fe05887544ce.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/6ff5935cb1f34d3fa633c62faf41024c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/43877f295ca042afb1d252c20f850766.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/32c5bea143544cb1a57633f23a1b47d0.jpg');
+
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A32','닭가슴살','수비드','블랙올리브',
+'[특가]수비드-블랙올리브 10팩',
+16600,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/163bfefb63d240059524fe05887544ce.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/6ff5935cb1f34d3fa633c62faf41024c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/43877f295ca042afb1d252c20f850766.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/32c5bea143544cb1a57633f23a1b47d0.jpg');
+
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A33','닭가슴살','수비드','블랙올리브',
+'[특가]수비드-블랙올리브 15팩',
+24600,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/163bfefb63d240059524fe05887544ce.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/6ff5935cb1f34d3fa633c62faf41024c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/43877f295ca042afb1d252c20f850766.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/32c5bea143544cb1a57633f23a1b47d0.jpg');
+
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('A34','닭가슴살','수비드','블랙올리브',
+'[특가]수비드-블랙올리브 20팩',
+32400,100,100,
+'http://www.goobnemall.com/static-root/prdct/2019/09/16/163bfefb63d240059524fe05887544ce.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/6ff5935cb1f34d3fa633c62faf41024c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/43877f295ca042afb1d252c20f850766.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/32c5bea143544cb1a57633f23a1b47d0.jpg');
+
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B01','소시지/햄','후랑크','마늘',
+'그릴후랑크 마늘 1팩',
+2150,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/69ca20340f064d92bed8b69eb9c27a50.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/9ef068d1f3ae4a879285c3278401fe20.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/a35bdaf8e409492a82e15b7ffcb519f6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d2e8de38faf04260a744db8eab3e73a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B02','소시지/햄','후랑크','마늘',
+'[특가] 굽네 닭가슴살 그릴후랑크(마늘) 6팩',
+9900,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/69ca20340f064d92bed8b69eb9c27a50.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/9ef068d1f3ae4a879285c3278401fe20.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/a35bdaf8e409492a82e15b7ffcb519f6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d2e8de38faf04260a744db8eab3e73a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B03','소시지/햄','후랑크','마늘',
+'[특가] 굽네 닭가슴살 그릴후랑크(마늘) 10팩',
+16300,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/69ca20340f064d92bed8b69eb9c27a50.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/9ef068d1f3ae4a879285c3278401fe20.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/a35bdaf8e409492a82e15b7ffcb519f6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d2e8de38faf04260a744db8eab3e73a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B04','소시지/햄','후랑크','마늘',
+'[특가] 굽네 닭가슴살 그릴후랑크(마늘) 20팩',
+32200,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/69ca20340f064d92bed8b69eb9c27a50.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/9ef068d1f3ae4a879285c3278401fe20.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/a35bdaf8e409492a82e15b7ffcb519f6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d2e8de38faf04260a744db8eab3e73a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B05','소시지/햄','후랑크','청양고추',
+'후랑크 청양고추 1팩',
+2150,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/7a411f75eef640f0aea9efd097db186c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d857b169316b467c9b4258c3d7ea195a.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/8722ea657b3f4cb088bba352fea94f35.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/75ccfdb87d2a45bb89e4d7b721c34d6f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B06','소시지/햄','후랑크','청양고추',
+'[특가] 굽네 닭가슴살 그릴후랑크(청양고추) 6팩',
+9900,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/7a411f75eef640f0aea9efd097db186c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d857b169316b467c9b4258c3d7ea195a.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/8722ea657b3f4cb088bba352fea94f35.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/75ccfdb87d2a45bb89e4d7b721c34d6f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B07','소시지/햄','후랑크','청양고추',
+'[특가] 굽네 닭가슴살 그릴후랑크(청양고추) 10팩',
+16300,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/7a411f75eef640f0aea9efd097db186c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d857b169316b467c9b4258c3d7ea195a.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/8722ea657b3f4cb088bba352fea94f35.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/75ccfdb87d2a45bb89e4d7b721c34d6f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B08','소시지/햄','후랑크','청양고추',
+'[특가] 굽네 닭가슴살 그릴후랑크(청양고추) 20팩',
+32200,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/7a411f75eef640f0aea9efd097db186c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/d857b169316b467c9b4258c3d7ea195a.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/8722ea657b3f4cb088bba352fea94f35.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/75ccfdb87d2a45bb89e4d7b721c34d6f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B09','소시지/햄','후랑크','블랙페퍼',
+'후랑크 블랙페퍼 1팩',
+2150,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/12c9d5a05dde432981b090b8b31a0437.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/318f8ce635eb4fc8b9a06365fc96386c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ee9d8b5a90fd4150892cda4bdfb58373.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/fa415837e45c4aae9060be04f708e398.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B10','소시지/햄','후랑크','블랙페퍼',
+'[특가] 굽네 닭가슴살 그릴후랑크(블랙페퍼) 6팩',
+9900,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/12c9d5a05dde432981b090b8b31a0437.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/318f8ce635eb4fc8b9a06365fc96386c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ee9d8b5a90fd4150892cda4bdfb58373.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/fa415837e45c4aae9060be04f708e398.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B11','소시지/햄','후랑크','블랙페퍼',
+'[특가] 굽네 닭가슴살 그릴후랑크(블랙페퍼) 10팩',
+16300,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/12c9d5a05dde432981b090b8b31a0437.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/318f8ce635eb4fc8b9a06365fc96386c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ee9d8b5a90fd4150892cda4bdfb58373.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/fa415837e45c4aae9060be04f708e398.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B12','소시지/햄','후랑크','블랙페퍼',
+'[특가] 굽네 닭가슴살 그릴후랑크(블랙페퍼) 20팩',
+32200,100,120,
+'https://www.goobnemall.com/static-root/prdct/2020/07/14/12c9d5a05dde432981b090b8b31a0437.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/318f8ce635eb4fc8b9a06365fc96386c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/ee9d8b5a90fd4150892cda4bdfb58373.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/01/15/fa415837e45c4aae9060be04f708e398.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B13','소시지/햄','닭가슴살햄','슬라이스햄',
+'굽네 닭가슴살 슬라이스 햄 1팩',
+2400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/ee34ab52f2844d65a7d6d1ab75a9d387.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/1b3877eead3d4ad7b1956eeb07f736b6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/7a16c44b5d6249e78249b238ea66a425.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/980cbb3d41ac438ca547fb0a6d6f136a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B14','소시지/햄','닭가슴살햄','슬라이스햄',
+'[특가] 굽네 닭가슴살 슬라이스햄 3팩',
+5790,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/ee34ab52f2844d65a7d6d1ab75a9d387.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/1b3877eead3d4ad7b1956eeb07f736b6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/7a16c44b5d6249e78249b238ea66a425.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/980cbb3d41ac438ca547fb0a6d6f136a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B15','소시지/햄','닭가슴살햄','슬라이스햄',
+'[특가] 굽네 닭가슴살 슬라이스햄 5팩',
+9510,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/ee34ab52f2844d65a7d6d1ab75a9d387.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/1b3877eead3d4ad7b1956eeb07f736b6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/7a16c44b5d6249e78249b238ea66a425.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/980cbb3d41ac438ca547fb0a6d6f136a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B16','소시지/햄','닭가슴살햄','슬라이스햄',
+'[특가] 굽네 닭가슴살 슬라이스햄 10팩',
+18730,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/ee34ab52f2844d65a7d6d1ab75a9d387.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/1b3877eead3d4ad7b1956eeb07f736b6.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/7a16c44b5d6249e78249b238ea66a425.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/16/980cbb3d41ac438ca547fb0a6d6f136a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B17','소시지/햄','닭가슴살햄','캔햄',
+'굽네 치팸 클래식 1개',
+4200,100,200,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/c96ae97491e142bfbb7049d7913874a2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/d5570d30349540269abc2c4834d16739.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/63fd22d924e9443aa3a5077699050bf5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/3d081efaa4f14a799a1be86a0bbc32a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B18','소시지/햄','닭가슴살햄','캔햄',
+'[특가]굽네 치팸 클래식 3개',
+9000,100,200,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/c96ae97491e142bfbb7049d7913874a2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/d5570d30349540269abc2c4834d16739.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/63fd22d924e9443aa3a5077699050bf5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/3d081efaa4f14a799a1be86a0bbc32a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B19','소시지/햄','닭가슴살햄','캔햄',
+'[특가]굽네 치팸 클래식 5개',
+14800,100,200,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/c96ae97491e142bfbb7049d7913874a2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/d5570d30349540269abc2c4834d16739.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/63fd22d924e9443aa3a5077699050bf5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/3d081efaa4f14a799a1be86a0bbc32a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('B20','소시지/햄','닭가슴살햄','캔햄',
+'[특가]굽네 치팸 클래식 10개',
+29200,100,200,
+'https://www.goobnemall.com/static-root/prdct/2019/09/17/c96ae97491e142bfbb7049d7913874a2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/d5570d30349540269abc2c4834d16739.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/63fd22d924e9443aa3a5077699050bf5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/3d081efaa4f14a799a1be86a0bbc32a8.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C01','볼/스테이크','닭가슴살볼','청양고추맛',
+'굽네 탱글탱글 닭가슴살볼-청양고추맛 1팩',
+2650,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/0f3f029db2184d1e985db83be4583ee2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/617bf9633cc8441886bfa02f9a7e570d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6a5708960f5246eda0e77ca087e7e8b3.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/17770f69e28d49e1b6ad631a7366e465.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C02','볼/스테이크','닭가슴살볼','청양고추맛',
+'[특가]탱글탱글 닭가슴살볼-청양고추맛 3팩',
+6950,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/0f3f029db2184d1e985db83be4583ee2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/617bf9633cc8441886bfa02f9a7e570d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6a5708960f5246eda0e77ca087e7e8b3.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/17770f69e28d49e1b6ad631a7366e465.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C03','볼/스테이크','닭가슴살볼','청양고추맛',
+'[특가]탱글탱글 닭가슴살볼-청양고추맛 5팩',
+11350,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/0f3f029db2184d1e985db83be4583ee2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/617bf9633cc8441886bfa02f9a7e570d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6a5708960f5246eda0e77ca087e7e8b3.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/17770f69e28d49e1b6ad631a7366e465.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C04','볼/스테이크','닭가슴살볼','청양고추맛',
+'[특가]탱글탱글 닭가슴살볼-청양고추맛 10팩',
+22400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/0f3f029db2184d1e985db83be4583ee2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/617bf9633cc8441886bfa02f9a7e570d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6a5708960f5246eda0e77ca087e7e8b3.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/17770f69e28d49e1b6ad631a7366e465.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C05','볼/스테이크','닭가슴살볼','깻잎맛',
+'굽네 탱글탱글 닭가슴살볼-깻잎맛 1팩',
+2650,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/bfe0dc5767ea4a42806adf8c5607a7d5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d26a298e6dab487db3df466bc3a7e02c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/32d682c506624d5d9d9bd02486d9aaaa.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/731a73cfdc1f4afb9aff14e6ef0f1f6a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C06','볼/스테이크','닭가슴살볼','깻잎맛',
+'[특가]탱글탱글 닭가슴살볼-깻잎맛 3팩',
+6950,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/bfe0dc5767ea4a42806adf8c5607a7d5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d26a298e6dab487db3df466bc3a7e02c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/32d682c506624d5d9d9bd02486d9aaaa.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/731a73cfdc1f4afb9aff14e6ef0f1f6a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C07','볼/스테이크','닭가슴살볼','깻잎맛',
+'[특가]탱글탱글 닭가슴살볼-깻잎맛 5팩',
+11350,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/bfe0dc5767ea4a42806adf8c5607a7d5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d26a298e6dab487db3df466bc3a7e02c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/32d682c506624d5d9d9bd02486d9aaaa.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/731a73cfdc1f4afb9aff14e6ef0f1f6a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C08','볼/스테이크','닭가슴살볼','깻잎맛',
+'[특가]탱글탱글 닭가슴살볼-깻잎맛 10팩',
+22400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/bfe0dc5767ea4a42806adf8c5607a7d5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d26a298e6dab487db3df466bc3a7e02c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/32d682c506624d5d9d9bd02486d9aaaa.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/731a73cfdc1f4afb9aff14e6ef0f1f6a.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C09','볼/스테이크','닭가슴살볼','콘맛',
+'굽네 탱글탱글 닭가슴살볼-콘맛 1팩',
+2650,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ca3967c99e724ed8b34b0bcc08989f11.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d1d6f870881747efa909929b7af48993.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/e7f2ec47cd8748dd81e2d8a080e239bb.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b10023994561496286d50323353b71d0.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C10','볼/스테이크','닭가슴살볼','콘맛',
+'[특가]탱글탱글 닭가슴살볼-콘맛 3팩',
+6950,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ca3967c99e724ed8b34b0bcc08989f11.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d1d6f870881747efa909929b7af48993.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/e7f2ec47cd8748dd81e2d8a080e239bb.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b10023994561496286d50323353b71d0.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C11','볼/스테이크','닭가슴살볼','콘맛',
+'[특가]탱글탱글 닭가슴살볼-콘맛 5팩',
+11350,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ca3967c99e724ed8b34b0bcc08989f11.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d1d6f870881747efa909929b7af48993.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/e7f2ec47cd8748dd81e2d8a080e239bb.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b10023994561496286d50323353b71d0.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C12','볼/스테이크','닭가슴살볼','콘맛',
+'[특가]탱글탱글 닭가슴살볼-콘맛 10팩',
+22400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ca3967c99e724ed8b34b0bcc08989f11.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/d1d6f870881747efa909929b7af48993.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/e7f2ec47cd8748dd81e2d8a080e239bb.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b10023994561496286d50323353b71d0.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C13','볼/스테이크','오븐스테이크','청양고추맛',
+'굽네 닭가슴살 오븐 스테이크-청양고추맛 1팩',
+2450,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/77a408dcac2247c39bffa93feab059b2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7d8ba3120b4b410f8f5d3fc1d5761d99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/313b30fa89f44bd2bb67284e895168ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/614a090ea967427ea7299cb98fd96021.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C14','볼/스테이크','오븐스테이크','청양고추맛',
+'[특가]닭가슴살 오븐 스테이크-청양고추맛 3팩',
+6300,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/77a408dcac2247c39bffa93feab059b2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7d8ba3120b4b410f8f5d3fc1d5761d99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/313b30fa89f44bd2bb67284e895168ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/614a090ea967427ea7299cb98fd96021.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C15','볼/스테이크','오븐스테이크','청양고추맛',
+'[특가]닭가슴살 오븐 스테이크-청양고추맛 5팩',
+10350,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/77a408dcac2247c39bffa93feab059b2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7d8ba3120b4b410f8f5d3fc1d5761d99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/313b30fa89f44bd2bb67284e895168ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/614a090ea967427ea7299cb98fd96021.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C16','볼/스테이크','오븐스테이크','청양고추맛',
+'[특가]닭가슴살 오븐 스테이크-청양고추맛 10팩',
+20400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/77a408dcac2247c39bffa93feab059b2.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7d8ba3120b4b410f8f5d3fc1d5761d99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/313b30fa89f44bd2bb67284e895168ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/614a090ea967427ea7299cb98fd96021.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C17','볼/스테이크','오븐스테이크','깻잎맛',
+'굽네 닭가슴살 오븐 스테이크-깻잎맛 1팩',
+2450,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ecc17f90fd544e389ebd21c7c5bd5259.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b295d628af3c406a9d387758287a3fd0.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/82dfd86a8c124e83ba360dd28df0c5c9.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6625b1daa2984776ba6a99518428a42b.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C18','볼/스테이크','오븐스테이크','깻잎맛',
+'[특가]닭가슴살 오븐 스테이크-깻잎맛 3팩',
+6300,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ecc17f90fd544e389ebd21c7c5bd5259.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b295d628af3c406a9d387758287a3fd0.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/82dfd86a8c124e83ba360dd28df0c5c9.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6625b1daa2984776ba6a99518428a42b.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C19','볼/스테이크','오븐스테이크','깻잎맛',
+'[특가]닭가슴살 오븐 스테이크-깻잎맛 5팩',
+10350,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ecc17f90fd544e389ebd21c7c5bd5259.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b295d628af3c406a9d387758287a3fd0.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/82dfd86a8c124e83ba360dd28df0c5c9.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6625b1daa2984776ba6a99518428a42b.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C20','볼/스테이크','오븐스테이크','깻잎맛',
+'[특가]닭가슴살 오븐 스테이크-깻잎맛 10팩',
+20400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/ecc17f90fd544e389ebd21c7c5bd5259.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/b295d628af3c406a9d387758287a3fd0.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/82dfd86a8c124e83ba360dd28df0c5c9.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/6625b1daa2984776ba6a99518428a42b.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C21','볼/스테이크','오븐스테이크','콘맛',
+'굽네 닭가슴살 오븐 스테이크-콘맛 1팩',
+2450,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/17c016c412934329a8e9f998d3a2fe99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/723f452cdc564ac29cb8f1e091691c7c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7a3a19eef1bf4043bab1fcd5dd7fed63.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/24f1095adbc84ac69e3001a89398aedc.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C22','볼/스테이크','오븐스테이크','콘맛',
+'[특가]닭가슴살 오븐 스테이크-콘맛 3팩',
+6300,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/17c016c412934329a8e9f998d3a2fe99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/723f452cdc564ac29cb8f1e091691c7c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7a3a19eef1bf4043bab1fcd5dd7fed63.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/24f1095adbc84ac69e3001a89398aedc.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C23','볼/스테이크','오븐스테이크','콘맛',
+'[특가]닭가슴살 오븐 스테이크-콘맛 5팩',
+10350,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/17c016c412934329a8e9f998d3a2fe99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/723f452cdc564ac29cb8f1e091691c7c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7a3a19eef1bf4043bab1fcd5dd7fed63.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/24f1095adbc84ac69e3001a89398aedc.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('C24','볼/스테이크','오븐스테이크','콘맛',
+'[특가]닭가슴살 오븐 스테이크-콘맛 10팩',
+20400,100,100,
+'https://www.goobnemall.com/static-root/prdct/2019/09/16/17c016c412934329a8e9f998d3a2fe99.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/723f452cdc564ac29cb8f1e091691c7c.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/7a3a19eef1bf4043bab1fcd5dd7fed63.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/09/04/24f1095adbc84ac69e3001a89398aedc.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D01','치밥/볶음밥','치밥/볶음밥','깍두기 치밥',
+'닭가슴살 깍두기 치밥 1팩',
+2850,100,200,
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5708b550361441229c6e52fca9bac41e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/2fa5854205154cb38cd7f0055637a0ac.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5f30a5cbf2aa45e08f1cd6efb62ee1ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5e4366534067460cb03fb37b069ab1b3.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D02','치밥/볶음밥','치밥/볶음밥','깍두기 치밥',
+'닭가슴살 깍두기 치밥 3팩',
+8460,100,200,
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5708b550361441229c6e52fca9bac41e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/2fa5854205154cb38cd7f0055637a0ac.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5f30a5cbf2aa45e08f1cd6efb62ee1ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5e4366534067460cb03fb37b069ab1b3.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D03','치밥/볶음밥','치밥/볶음밥','깍두기 치밥',
+'닭가슴살 깍두기 치밥 5팩',
+14025,100,200,
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5708b550361441229c6e52fca9bac41e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/2fa5854205154cb38cd7f0055637a0ac.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5f30a5cbf2aa45e08f1cd6efb62ee1ed.jpg',
+'https://www.goobnemall.com/static-root/prdct/2020/09/17/5e4366534067460cb03fb37b069ab1b3.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D04','치밥/볶음밥','치밥/볶음밥','볼케이노 치밥',
+'볼케이노 치밥 1팩',
+2850,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/7a62faf006f34dd49c278bfeac3cfc22.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/17bebd91511e40bba3b6b1086bb40676.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/0854c57fe1cb4db3adb7f77695bf2f8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/612c2811397c4894b6147e07ec7da46f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D05','치밥/볶음밥','치밥/볶음밥','볼케이노 치밥',
+'[특가]볼케이노 치밥 3팩',
+6490,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/7a62faf006f34dd49c278bfeac3cfc22.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/17bebd91511e40bba3b6b1086bb40676.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/0854c57fe1cb4db3adb7f77695bf2f8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/612c2811397c4894b6147e07ec7da46f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D06','치밥/볶음밥','치밥/볶음밥','볼케이노 치밥',
+'[특가]볼케이노 치밥 5팩',
+10580,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/7a62faf006f34dd49c278bfeac3cfc22.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/17bebd91511e40bba3b6b1086bb40676.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/0854c57fe1cb4db3adb7f77695bf2f8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/612c2811397c4894b6147e07ec7da46f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D07','치밥/볶음밥','치밥/볶음밥','볼케이노 치밥',
+'[특가]볼케이노 치밥 10팩',
+20660,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/7a62faf006f34dd49c278bfeac3cfc22.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/17bebd91511e40bba3b6b1086bb40676.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/0854c57fe1cb4db3adb7f77695bf2f8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/612c2811397c4894b6147e07ec7da46f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D08','치밥/볶음밥','치밥/볶음밥','볼케이노 치밥',
+'[특가]볼케이노 치밥 15팩',
+30240,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/7a62faf006f34dd49c278bfeac3cfc22.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/17bebd91511e40bba3b6b1086bb40676.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/0854c57fe1cb4db3adb7f77695bf2f8d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/612c2811397c4894b6147e07ec7da46f.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D09','치밥/볶음밥','치밥/볶음밥','갈비천왕 치밥',
+'갈비천왕 치밥 1팩',
+2850,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/29348e00780d468dbc2e9284f4f178a7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/4b95ef95095148ab8c49799b5b878ded.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/9aa05cd381264878a621cd43e24b2e5d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/e615e70e098946e2aed06122d12f4131.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D10','치밥/볶음밥','치밥/볶음밥','갈비천왕 치밥',
+'갈비천왕 치밥 3팩',
+8460,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/29348e00780d468dbc2e9284f4f178a7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/4b95ef95095148ab8c49799b5b878ded.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/9aa05cd381264878a621cd43e24b2e5d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/e615e70e098946e2aed06122d12f4131.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('D11','치밥/볶음밥','치밥/볶음밥','갈비천왕 치밥',
+'갈비천왕 치밥 5팩',
+14025,100,200,
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/29348e00780d468dbc2e9284f4f178a7.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/4b95ef95095148ab8c49799b5b878ded.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/9aa05cd381264878a621cd43e24b2e5d.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/09/05/e615e70e098946e2aed06122d12f4131.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('E01','소스/샐러드','소스','볼케이노 소스',
+'볼케이노 소스(290g) 1개',
+4300,100,290,
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/513da9f9dd56447cadaf6938f88101d0.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/7fc62bf17f724e1e828e6038c5aae6ba.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/cdcfdb87b1974b51aa4b2d93db14cee5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/43c8fb67fcd94187a1113a4f19f6aece.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('E02','소스/샐러드','소스','볼케이노 소스',
+'볼케이노 소스(290g) 3개',
+12900,100,290,
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/513da9f9dd56447cadaf6938f88101d0.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/7fc62bf17f724e1e828e6038c5aae6ba.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/cdcfdb87b1974b51aa4b2d93db14cee5.jpg',
+'https://www.goobnemall.com/static-root/prdct/2018/10/24/43c8fb67fcd94187a1113a4f19f6aece.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('E03','소스/샐러드','소스','갈비천왕 소스',
+'갈비천왕 소스(280g) 1개',
+4300,100,280,
+'https://www.goobnemall.com/static-root/prdct/2019/07/30/ba8cb967f42e4193bebe6f659dd7fb57.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/29/5e176c92bdc34df68e2d03f84788e64a.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/29/0b5d0b45de604445be69a06eaf8fe37e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/29/3bd82559c5124b0497d7519b1b140c6b.jpg');
+
+insert into product (productNum,category1,category2,category3,
+productName,price,qty,amount,pic1,pic2,pic3,pic4) 
+values('E04','소스/샐러드','소스','갈비천왕 소스',
+'갈비천왕 소스(280g) 3개',
+12900,100,280,
+'https://www.goobnemall.com/static-root/prdct/2019/07/30/ba8cb967f42e4193bebe6f659dd7fb57.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/29/5e176c92bdc34df68e2d03f84788e64a.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/29/0b5d0b45de604445be69a06eaf8fe37e.jpg',
+'https://www.goobnemall.com/static-root/prdct/2019/07/29/3bd82559c5124b0497d7519b1b140c6b.jpg');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(1,'이기동','진짜 맛있음 ㅋㅋ','어제 같이 동생이랑 운동하면서 닭고기 먹었습니다. 근육 생김','2020-01-12');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(2,'kenzi','damn, i like these chicken','to be honest, its the best chicken ive ever had before','2020-04-12');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(3,'방탄팬','밑에 외국인임????','여기 글로벌하네욬ㅋㅋ','2020-05-11');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(4,'dlwlstjs123','오늘 입금했는데, 입금확인이 안됩니다.','확인해주세요','2020-05-14');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(5,'gmlwls1004','국산 닭고기 확실한가요???????????','저는 미국산만 먹습니다.','2020-06-01');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(6,'맛있어용','맛있어요요요요오 그런데 배송이 늦는 이유는 뭘까요?','2년 2개월만에 오는 닭고기는 첨보네','2020-06-20');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(7,'ㅎㅎㅎ','먹고 식중독에 걸렸습니다. 소송예정인데, 주소가 어떻게 되시죠?? ^^;;','냉무','2020-07-30');
+
+insert into qna(qnaNum,id,subject,content,created) values
+(8,'타이거jk','쿠폰을 현금으로 바꿀 수 있나요??','6월이벤트 쿠폰 못 썼는데 현금화 좀 해주세요','2020-08-14');
+
+COMMIT;
